@@ -13,6 +13,7 @@ package
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.media.Sound;
 	import flash.utils.*;
 	import com.greensock.plugins.TweenPlugin;
 	import com.greensock.plugins.ColorTransformPlugin;
@@ -59,6 +60,15 @@ package
 		// this will show our win/lose information
 		private var endCard:EndCard;
 		
+		// sound references
+		private const clickPressSound:ClickPressSound = new ClickPressSound();
+		private const clickReturnSound:ClickReturnSound = new ClickReturnSound();
+		private const correctSound:CorrectSound = new CorrectSound();
+		private const errorSound:ErrorSound = new ErrorSound();
+		private const gameOverSound:GameOverSound = new GameOverSound();
+		private const winSound:WinSound = new WinSound();
+		
+		
 		public function Main()
 		{
 			this.init();
@@ -68,7 +78,8 @@ package
 		{
 			// initalize our color transform plugin for greensock
 			TweenPlugin.activate([ColorTransformPlugin]); //activation is permanent in the SWF, so this line only needs to be run once.
-
+			
+			this.clickReturnSound
 			this.letterTiles = new Vector.<Tile>();
 			
 			this.dropTiles = new Vector.<LetterDropTile>();
@@ -194,6 +205,8 @@ package
 		
 		private function onTileGrabbed(event:MouseEvent):void
 		{
+			this.clickPressSound.play();
+			
 			var tile:Tile = event.currentTarget as Tile;
 			
 			// move our grabbed tile to be above all other elements on the stage
@@ -203,7 +216,7 @@ package
 		}
 		
 		private function onTileDropped(event:MouseEvent):void
-		{
+		{			
 			// check if we have hit a drop target and move the tile to that position
 			// otherwise, reset it back to the original position
 			var tile:Tile = event.currentTarget as Tile;
@@ -218,17 +231,20 @@ package
 				{
 					tile.lockToPoint(currentDrop.x, currentDrop.y);
 					this.numCorrect++;
+					this.correctSound.play();
 				}
 				// we dropped it on a wrong tile
 				else
 				{
 					isWrongTile = true;
 					tile.reset();
+					this.clickReturnSound.play();
 				}
 			}
 			else
 			{
 				tile.reset();
+				this.clickReturnSound.play();
 			}
 			
 			this.currentTile = null;
@@ -239,6 +255,7 @@ package
 				if (isWrongTile == true)
 				{
 					this.currentDrop.DoError();
+					this.errorSound.play();
 				}
 				else
 				{
@@ -306,10 +323,12 @@ package
 			if (didWin == true)
 			{
 				this.endCard.message = "well ain't that something. good job.";
+				this.winSound.play();
 			}
 			else
 			{
 				this.endCard.message = "too bad, so sad.";
+				this.gameOverSound.play();
 			}
 			
 			this.endCard.addEventListener(Event.COMPLETE, this.onEndCardComplete);

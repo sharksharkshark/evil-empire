@@ -15,6 +15,8 @@ package evil.tiles
 	
 	public class Tile extends MovieClip
 	{
+		private const spawnSound:SpawnSound = new SpawnSound();
+		
 		private static const tileStartingPosition:Point = new Point(79.95,511.00);
 		private static const positionIncrement:Point = new Point(120, 125);
 		
@@ -53,7 +55,7 @@ package evil.tiles
 		private function onAddedToStage(event:Event):void
 		{
 			TweenLite.to(this, 0.5, { scaleX: 1, scaleY: 1, ease: BackOut.ease } );
-			
+			spawnSound.play();
 			this.removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 		}
 		
