@@ -5,6 +5,7 @@ package
 	 * @author Nolen Tabner
 	 */
 	
+	import evil.CountdownTimer;
 	import evil.tiles.LetterDropTile;
 	import evil.tiles.Tile;
 	import flash.display.Sprite;
@@ -50,6 +51,9 @@ package
 		
 		// the number of correctly guessed letters
 		private var numCorrect:int;
+		
+		// this is an object on the stage
+		public var countdown:CountdownTimer;
 		
 		public function Main()
 		{
@@ -113,6 +117,10 @@ package
 			this.numCorrect = 0;
 			
 			// TODO: delete all tiles/move adding logic into a setup function
+			
+			
+			// reset the countdown timer
+			this.countdown.reset();
 			
 			// repopulate letterPool
 			while (letterPool.length > 0)
@@ -182,12 +190,24 @@ package
 			// check if we have hit a drop target and move the tile to that position
 			// otherwise, reset it back to the original position
 			var tile:Tile = event.currentTarget as Tile;
-
+			
+			var isWrongTile:Boolean = false;
+			
 			// we currently are dragging a tile and are touching a drop tile
-			if (this.currentDrop != null && this.currentDrop.targetLetter == tile.letter)
+			if (this.currentDrop != null)
 			{
-				tile.lockToPoint(currentDrop.x, currentDrop.y);
-				this.numCorrect++;
+				// we dropped it on a correct tile
+				if (this.currentDrop.targetLetter == tile.letter)
+				{
+					tile.lockToPoint(currentDrop.x, currentDrop.y);
+					this.numCorrect++;
+				}
+				// we dropped it on a wrong tile
+				else
+				{
+					isWrongTile = true;
+					tile.reset();
+				}
 			}
 			else
 			{
@@ -199,7 +219,15 @@ package
 			// clean up hover states for drop targets
 			if (this.currentDrop != null)
 			{
-				this.currentDrop.ResetHover();
+				if (isWrongTile == true)
+				{
+					this.currentDrop.DoError();
+				}
+				else
+				{
+					this.currentDrop.ResetHover();
+				}
+				
 				this.currentDrop = null;
 			}
 			
