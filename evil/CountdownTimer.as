@@ -6,12 +6,15 @@ package evil
 	 */
 	
 	import flash.display.MovieClip;
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.text.TextField;
 	import flash.utils.Timer;
 	
 	public class CountdownTimer extends MovieClip
 	{
+		public static const COUNTDOWN_EXPIRED:String = "countdownExpired";
+		
 		// reference to an object on the stage
 		public var textBox:TextField;
 		
@@ -25,22 +28,18 @@ package evil
 			this.timeRemaining = 60;
 			this.timer = new Timer(1000);
 			timer.addEventListener(TimerEvent.TIMER, this.onTime);
-			timer.start();
 		}
 		
 		public function onTime(event:TimerEvent):void
 		{
-			var minutes:int = timeRemaining / 60;
-			var seconds:int = timeRemaining % 60;
-			
-			this.textBox.text = (minutes + ":" + this.formatDigit(seconds));
+			this.updateText();
 			
 			timeRemaining--;
 			
 			if (timeRemaining < 0)
 			{
 				this.timer.stop();
-				trace("TIME'S UP. YOU LOSE");
+				this.dispatchEvent(new Event(COUNTDOWN_EXPIRED));
 			}
 		}
 		
@@ -58,10 +57,28 @@ package evil
 			}
 		}
 		
+		public function startTimer():void
+		{
+			timer.start();
+		}
+		
+		public function stopTimer():void
+		{
+			timer.stop();
+		}
+		
 		public function reset():void
 		{
 			this.timeRemaining = 60;
-			this.timer.start();
+			this.updateText();
+		}
+		
+		private function updateText():void
+		{
+			var minutes:int = timeRemaining / 60;
+			var seconds:int = timeRemaining % 60;
+			
+			this.textBox.text = (minutes + ":" + this.formatDigit(seconds));
 		}
 	}
 

@@ -6,6 +6,7 @@ package
 	 */
 	
 	import evil.CountdownTimer;
+	import evil.EndCard;
 	import evil.tiles.LetterDropTile;
 	import evil.tiles.Tile;
 	import flash.display.Sprite;
@@ -55,6 +56,9 @@ package
 		// this is an object on the stage
 		public var countdown:CountdownTimer;
 		
+		// this will show our win/lose information
+		private var endCard:EndCard;
+		
 		public function Main()
 		{
 			this.init();
@@ -87,12 +91,46 @@ package
 			
 			this.populateLetterPool();
 			
+			this.buildTileGrid();
+			
+			this.addEventListener(MouseEvent.MOUSE_MOVE, this.onMouseMove);
+			
+			this.countdown.addEventListener(CountdownTimer.COUNTDOWN_EXPIRED, this.onCountdownExpired);
+			// start the countdown
+			this.countdown.startTimer();
+		}
+		
+		private function ResetGame():void
+		{
+			this.numCorrect = 0;
+			
+			// delete all tiles
+			while(this.letterTiles.length > 0)
+			{
+				var t:Tile = this.letterTiles.pop();
+				t.removeEventListener(Tile.TILE_GRABBED, this.onTileGrabbed);
+				t.removeEventListener(Tile.TILE_DROPPED, this.onTileDropped);
+				this.removeChild(t);
+			}
+			
+			// reset the countdown timer
+			this.countdown.reset();
+			
+			// repopulate letterPool
+			while (letterPool.length > 0)
+			{
+				letterPool.pop();
+			}
+			
+			this.populateLetterPool();			
+		}
+		
+		private function buildTileGrid():void
+		{
 			// add new tiles, based on our row and column count
 			var r:int = 0;
 			var c:int = 0;
-			
-			// reuse our counter from earliers
-			i = 0;
+			var i:int = 0;
 			
 			for (r = 0; r < ROWS; r++)
 			{
@@ -108,27 +146,6 @@ package
 					i++;
 				}
 			}
-			
-			this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		}
-		
-		private function ResetGame():void
-		{
-			this.numCorrect = 0;
-			
-			// TODO: delete all tiles/move adding logic into a setup function
-			
-			
-			// reset the countdown timer
-			this.countdown.reset();
-			
-			// repopulate letterPool
-			while (letterPool.length > 0)
-			{
-				letterPool.pop();
-			}
-			
-			this.populateLetterPool();
 		}
 		
 		private function populateLetterPool():void
@@ -234,7 +251,8 @@ package
 			// check if we have correctly guessed all required tiles
 			if (this.numCorrect == answerPhrase.length)
 			{
-				trace("yay. game over clause hit.");
+				this.countdown.stopTimer();
+				this.showEnd(true);
 			}
 		}
 		
@@ -266,6 +284,58 @@ package
 					this.currentDrop = null;
 				}
 			}
+		}
+		
+		private function onCountdownExpired(event:Event):void 
+		{
+			for each(var t:Tile in this.letterTiles)
+			{
+				t.mouseEnabled = false;
+			}
+			
+			// setup our endcard to show the game over screen
+			this.showEnd(false);
+		}
+		
+		private function showEnd(didWin:Boolean):void
+		{
+			this.endCard = new EndCard();
+			this.endCard.x = stage.stageWidth / 2;
+			this.endCard.y = stage.stageHeight / 2;
+			
+			if (didWin == true)
+			{
+				this.endCard.message = "well ain't that something. good job.";
+			}
+			else
+			{
+				this.endCard.message = "too bad, so sad.";
+			}
+			
+			this.endCard.addEventListener(Event.COMPLETE, this.onEndCardComplete);
+			this.endCard.addEventListener(Event.CLOSE, this.onEndCardClose);
+			
+			this.addChild(this.endCard);
+		}
+		
+		private function onEndCardComplete(event:Event):void
+		{
+			// cleanup the endCard reference
+			this.removeChild(this.endCard);
+			this.endCard.removeEventListener(Event.COMPLETE, this.onEndCardComplete);
+			this.endCard.removeEventListener(Event.CLOSE, this.onEndCardClose);
+			this.endCard = null;
+
+			// rebuild our letter tiles
+			this.buildTileGrid();
+			
+			// restart the countdown timer
+			this.countdown.startTimer();
+		}
+		
+		private function onEndCardClose(event:Event):void
+		{
+			this.ResetGame();
 		}
 	}
 }

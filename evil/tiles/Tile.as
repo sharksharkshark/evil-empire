@@ -45,6 +45,11 @@ package evil.tiles
 			this.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
 		
+		override public function toString():String 
+		{
+			return "Tile: " + this.letter;
+		}
+		
 		private function onAddedToStage(event:Event):void
 		{
 			TweenLite.to(this, 0.5, { scaleX: 1, scaleY: 1, ease: BackOut.ease } );
