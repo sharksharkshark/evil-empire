@@ -60,7 +60,9 @@ package evil.tiles
 			
 			this.startDrag(true);
 			
-			this.dispatchEvent(new Event(TILE_GRABBED));
+			this.dispatchEvent(new MouseEvent(TILE_GRABBED));
+			
+			this.mouseEnabled = false;
 		}
 		
 		private function onMouseUp(event:MouseEvent):void
@@ -69,7 +71,9 @@ package evil.tiles
 			
 			this.stopDrag();
 			
-			this.dispatchEvent(new Event(TILE_DROPPED));
+			this.dispatchEvent(new MouseEvent(TILE_DROPPED));
+			
+			this.mouseEnabled = true;
 		}
 		
 		public function reset():void
