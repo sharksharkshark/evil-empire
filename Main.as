@@ -34,6 +34,14 @@ package
 		// the currently grabbed tile
 		private var currentTile:Tile;
 		
+		// the currently hovered drop target
+		private var currentDrop:LetterDropTile;
+		
+		// this could be made into something much more dynamic as well
+		private const answerPhrase:String = "EVILEMPIRE"
+		
+		private var letterPool:Vector.<String>;
+		
 		public function Main()
 		{
 			// initalize our color transform plugin for greensock
@@ -49,9 +57,12 @@ package
 
 			for (i = 1; i <= 10; i++)
 			{
-				this.dropTiles.push(this["drop" + i]);
+				var dt:LetterDropTile = this["drop" + i];
+				dt.targetLetter = answerPhrase.charAt(i - 1);
+				this.dropTiles.push(dt);
 			}
 			
+			// add new tiles, based on our row and column count
 			var r:int = 0;
 			var c:int = 0;
 			
@@ -59,7 +70,8 @@ package
 			{
 				for (c = 0; c < COLS; c++)
 				{
-					var t:Tile = new Tile(c, r, "X");
+					// TODO: populate the tile with a character from a 'random' list
+					var t:Tile = new Tile(c, r, "E");
 					t.addEventListener(Tile.TILE_GRABBED, this.onTileGrabbed);
 					t.addEventListener(Tile.TILE_DROPPED, this.onTileDropped);
 					setTimeout( this.addTile, (0.1 * (c+r)) * 1000, t); 
@@ -88,15 +100,24 @@ package
 		
 		private function onTileDropped(event:MouseEvent):void
 		{
-			// TODO: check if we have hit a drop target and move the tile to that position
-			// otherwise, reset it back to the original position like we are currently doing
+			// check if we have hit a drop target and move the tile to that position
+			// otherwise, reset it back to the original position
 			var tile:Tile = event.currentTarget as Tile;
-			
-			
-			
-			tile.reset();
+
+			// we currently are dragging a tile and are touching a drop tile
+			if (this.currentDrop != null && this.currentDrop.targetLetter == tile.letter)
+			{
+				tile.lockToPoint(currentDrop.x, currentDrop.y);
+			}
+			else
+			{
+				tile.reset();
+			}
 			
 			this.currentTile = null;
+			
+			this.currentDrop.ResetHover();
+			this.currentDrop = null;
 		}
 		
 		
@@ -106,17 +127,26 @@ package
 			{				
 				var p:Point = new Point(event.stageX, event.stageY);
 				
+				var hovered:uint = 0;
+				
 				for each(var dt:LetterDropTile in this.dropTiles)
 				{
 					// we currently are dragging a tile and are touching a drop tile
 					if (dt.hitTestPoint(p.x, p.y) == true)
 					{
 						dt.DoHover();
+						this.currentDrop = dt;
+						hovered++;
 					}
 					else
 					{
 						dt.ResetHover();
 					}
+				}
+				
+				if (hovered == 0)
+				{
+					this.currentDrop = null;
 				}
 			}
 		}

@@ -35,7 +35,7 @@ package evil.tiles
 		
 		public function Tile(x:Number, y:Number, newLetter:String) 
 		{
-			this.setPosition(x, y);
+			this.setOffsetPosition(x, y);
 			this.letter = newLetter;
 			this.scaleX = 0;
 			this.scaleY = 0;
@@ -80,13 +80,21 @@ package evil.tiles
 		{
 			TweenLite.to(this, 0.4, { x: this.originalPosition.x, y: this.originalPosition.y, scaleX: 1, scaleY: 1, ease: BackOut.ease } );			
 		}
-		public function setPosition(x:Number, y:Number):void
+		
+		private function setOffsetPosition(x:Number, y:Number):void
 		{
 			this.x = tileStartingPosition.x + (x*positionIncrement.x);
 			this.y = tileStartingPosition.y + (y * positionIncrement.y);
 			
 			this.originalPosition.x = this.x;
 			this.originalPosition.y = this.y;
+		}
+		
+		public function lockToPoint(x:Number, y:Number):void
+		{
+			TweenLite.to(this, 0.5, { x: x, y: y, scaleX: 1, scaleY: 1, ease: BackOut.ease} );
+			this.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			this.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
 		
 		public function get letter():String

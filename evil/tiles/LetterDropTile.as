@@ -1,4 +1,4 @@
-package evil.tiles 
+﻿package evil.tiles 
 {
 	/**
 	 * ...
@@ -17,7 +17,7 @@ package evil.tiles
 		private static const errorColor:uint = 0xFF3D2E;
 		private static const baseColor:Color = new Color();
 		
-		public var targetLetter:String;
+		private var _targetLetter:String;
 		
 		// reference to our ColorTransform object
 		private var colorTransform;
@@ -37,6 +37,16 @@ package evil.tiles
 		public function ResetHover():void
 		{
 			TweenLite.to(this, 0.3, {colorTransform:{tint:hoverColor, tintAmount:0}});
+		}
+		
+		public function get targetLetter():String
+		{
+			return this._targetLetter;
+		}
+		
+		public function set targetLetter(value:String):void
+		{
+			this._targetLetter = value;
 		}
 	}
 
